@@ -1,83 +1,67 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.5">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+    <style>
+        body { text-align: center; font-family: sans-serif; background: #f0f0f0; margin-top: 50px; }
+        #container { position: relative; width: 400px; height: 400px; margin: 0 auto; cursor: crosshair; }
+        canvas { position: absolute; top: 0; left: 0; border-radius: 10px; }
+        #under-image { width: 400px; height: 400px; object-fit: cover; border-radius: 10px; }
+        #message { margin-top: 20px; font-weight: bold; color: #333; display: none; }
+    </style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>body { text-align: center; font-family: sans-serif; background: #f0f0f0; margin-top: 50px; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>#container { position: relative; width: 400px; height: 400px; margin: 0 auto; cursor: crosshair; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>canvas { position: absolute; top: 0; left: 0; border-radius: 10px; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>#under-image { width: 400px; height: 400px; object-fit: cover; border-radius: 10px; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>#message { margin-top: 20px; font-weight: bold; color: #333; display: none; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2&gt;Scratch to reveal your surprise! 🎂&lt;/h2&gt;</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- The hidden image --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;img id="under-image" src="https://i.ibb.co/FkRV2VTk/782-F89-CA-FBC0-4-D94-A084-4-B6-FD11-E5387.png"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- The scratchable layer --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;canvas id="scratch-canvas" width="400" height="400"&gt;&lt;/canvas&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="message"&gt;✨ Happy Birthday! Click play if the music didn't start! ✨&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;audio id="birthday-song" src="https://www.dropbox.com/scl/fi/pjwws1lb3uyw85c797qvn/We-re-the-Birthday-Bitches-The-40-Club-Remix.mp3?rlkey=cnq7hx5hkfjltrp8mvyp396u1&amp;st=wj9975wn&amp;raw=1"&gt;&lt;/audio&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const canvas = document.getElementById('scratch-canvas');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const ctx = canvas.getContext('2d');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const audio = document.getElementById('birthday-song');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const message = document.getElementById('message');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let scratchedAmount = 0;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Fill the canvas with a "cover" color</p>
-<p class="p1"><span class="Apple-converted-space">        </span>ctx.fillStyle = '#C0C0C0';<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>ctx.fillRect(0, 0, canvas.width, canvas.height);</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Use "destination-out" to make the brush erase the gray layer</p>
-<p class="p1"><span class="Apple-converted-space">        </span>ctx.globalCompositeOperation = 'destination-out';</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function scratch(e) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const rect = canvas.getBoundingClientRect();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const x = (e.clientX || e.touches[0].clientX) - rect.left;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const y = (e.clientY || e.touches[0].clientY) - rect.top;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.beginPath();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.arc(x, y, 30, 0, Math.PI * 2);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>ctx.fill();</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>checkScratchAmount();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function checkScratchAmount() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>scratchedAmount++;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Once they scratch enough (roughly 150 "paints"), trigger the song</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (scratchedAmount &gt; 150) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>canvas.style.transition = "opacity 1s";</p>
-<p class="p1"><span class="Apple-converted-space">                </span>canvas.style.opacity = "0";</p>
-<p class="p1"><span class="Apple-converted-space">                </span>message.style.display = "block";</p>
-<p class="p1"><span class="Apple-converted-space">                </span>audio.play().catch(err =&gt; console.log("Autoplay blocked, user must click first"));</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>canvas.addEventListener('mousemove', scratch);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>canvas.addEventListener('touchmove', (e) =&gt; { e.preventDefault(); scratch(e); });</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+
+    <h2>Scratch to reveal your surprise! 🎂</h2>
+    
+    <div id="container">
+        <!-- The hidden image -->
+        <img id="under-image" src="https://i.ibb.co/FkRV2VTk/782-F89-CA-FBC0-4-D94-A084-4-B6-FD11-E5387.png">
+        <!-- The scratchable layer -->
+        <canvas id="scratch-canvas" width="400" height="400"></canvas>
+    </div>
+
+    <div id="message">✨ Happy Birthday! Click play if the music didn't start! ✨</div>
+    <audio id="birthday-song" src="https://www.dropbox.com/scl/fi/pjwws1lb3uyw85c797qvn/We-re-the-Birthday-Bitches-The-40-Club-Remix.mp3?rlkey=cnq7hx5hkfjltrp8mvyp396u1&st=wj9975wn&raw=1"></audio>
+
+    <script>
+        const canvas = document.getElementById('scratch-canvas');
+        const ctx = canvas.getContext('2d');
+        const audio = document.getElementById('birthday-song');
+        const message = document.getElementById('message');
+        let scratchedAmount = 0;
+
+        // Fill the canvas with a "cover" color
+        ctx.fillStyle = '#C0C0C0'; 
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Use "destination-out" to make the brush erase the gray layer
+        ctx.globalCompositeOperation = 'destination-out';
+
+        function scratch(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 30, 0, Math.PI * 2);
+            ctx.fill();
+            
+            checkScratchAmount();
+        }
+
+        function checkScratchAmount() {
+            scratchedAmount++;
+            // Once they scratch enough (roughly 150 "paints"), trigger the song
+            if (scratchedAmount > 150) {
+                canvas.style.transition = "opacity 1s";
+                canvas.style.opacity = "0";
+                message.style.display = "block";
+                audio.play().catch(err => console.log("Autoplay blocked, user must click first"));
+            }
+        }
+
+        canvas.addEventListener('mousemove', scratch);
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); scratch(e); });
+    </script>
 </body>
 </html>
