@@ -1,41 +1,108 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Surprise!</title>
+    <!-- We use this for the confetti effect -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body { text-align: center; font-family: sans-serif; background: #f0f0f0; margin-top: 50px; }
-        #container { position: relative; width: 400px; height: 400px; margin: 0 auto; cursor: crosshair; }
-        canvas { position: absolute; top: 0; left: 0; border-radius: 10px; }
-        #under-image { width: 400px; height: 400px; object-fit: cover; border-radius: 10px; }
-        #message { margin-top: 20px; font-weight: bold; color: #333; display: none; }
+        body { 
+            text-align: center; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #1a1a1a; 
+            color: white;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden; /* Prevents scrolling while scratching */
+        }
+        h2 { margin-bottom: 10px; color: #FFD700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        
+        #container { 
+            position: relative; 
+            width: 85vw; 
+            max-width: 400px; 
+            aspect-ratio: 1 / 1;
+            margin: 10px auto; 
+            cursor: crosshair;
+            border: 5px solid #FFD700;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            background: #333;
+        }
+        canvas { 
+            position: absolute; 
+            top: 0; left: 0; 
+            border-radius: 10px;
+            z-index: 2;
+            touch-action: none;
+        }
+        #under-image { 
+            width: 100%; height: 100%; 
+            object-fit: cover; 
+            border-radius: 10px;
+            z-index: 1;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: none; 
+            animation: fadeIn 1s;
+        }
+        button, .download-btn {
+            background: #FFD700;
+            color: #1a1a1a;
+            border: none;
+            padding: 12px 25px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+            box-shadow: 0 4px 10px rgba(255,215,0,0.3);
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <h2>Scratch to reveal your surprise! 🎂</h2>
+    <h2 id="title">Scratch to reveal your surprise! ✨</h2>
     
     <div id="container">
-        <!-- The hidden image -->
+        <!-- Your Image -->
         <img id="under-image" src="https://i.ibb.co/FkRV2VTk/782-F89-CA-FBC0-4-D94-A084-4-B6-FD11-E5387.png">
-        <!-- The scratchable layer -->
-        <canvas id="scratch-canvas" width="400" height="400"></canvas>
+        <!-- The Gold Scratch Layer -->
+        <canvas id="scratch-canvas"></canvas>
     </div>
 
-    <div id="message">✨ Happy Birthday! Click play if the music didn't start! ✨</div>
-    <audio id="birthday-song" src="https://www.dropbox.com/scl/fi/pjwws1lb3uyw85c797qvn/We-re-the-Birthday-Bitches-The-40-Club-Remix.mp3?rlkey=cnq7hx5hkfjltrp8mvyp396u1&st=wj9975wn&raw=1"></audio>
+    <div class="controls" id="controls">
+        <h1 style="color: #FFD700; margin: 10px 0;">🎉 HAPPY BIRTHDAY! 🎉</h1>
+        <button onclick="toggleMusic()" id="playBtn">Pause Music ⏸️</button>
+        <!-- Your Song -->
+        <a id="downloadLink" class="download-btn" href="https://www.dropbox.com/scl/fi/pjwws1lb3uyw85c797qvn/We-re-the-Birthday-Bitches-The-40-Club-Remix.mp3?rlkey=cnq7hx5hkfjltrp8mvyp396u1&st=wj9975wn&raw=1" download="Birthday-Remix.mp3">Download Song ⬇️</a>
+    </div>
+
+    <audio id="birthday-song" src="https://www.dropbox.com/scl/fi/pjwws1lb3uyw85c797qvn/We-re-the-Birthday-Bitches-The-40-Club-Remix.mp3?rlkey=cnq7hx5hkfjltrp8mvyp396u1&st=wj9975wn&raw=1" loop></audio>
 
     <script>
         const canvas = document.getElementById('scratch-canvas');
         const ctx = canvas.getContext('2d');
+        const container = document.getElementById('container');
         const audio = document.getElementById('birthday-song');
-        const message = document.getElementById('message');
-        let scratchedAmount = 0;
+        const playBtn = document.getElementById('playBtn');
+        let hasWon = false;
+        let scratchCount = 0;
 
-        // Fill the canvas with a "cover" color
-        ctx.fillStyle = '#C0C0C0'; 
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Use "destination-out" to make the brush erase the gray layer
-        ctx.globalCompositeOperation = 'destination-out';
+        function resize() {
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+            ctx.fillStyle = '#FFD700'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'destination-out';
+        }
+        window.addEventListener('resize', resize);
+        resize();
 
         function scratch(e) {
             const rect = canvas.getBoundingClientRect();
@@ -43,24 +110,43 @@
             const y = (e.clientY || e.touches[0].clientY) - rect.top;
             
             ctx.beginPath();
-            ctx.arc(x, y, 30, 0, Math.PI * 2);
+            ctx.arc(x, y, 35, 0, Math.PI * 2);
             ctx.fill();
             
-            checkScratchAmount();
-        }
+            if (audio.paused) {
+                audio.play();
+                document.getElementById('controls').style.display = 'block';
+            }
 
-        function checkScratchAmount() {
-            scratchedAmount++;
-            // Once they scratch enough (roughly 150 "paints"), trigger the song
-            if (scratchedAmount > 150) {
-                canvas.style.transition = "opacity 1s";
+            scratchCount++;
+            // After enough scratching, trigger confetti
+            if (scratchCount > 100 && !hasWon) {
+                hasWon = true;
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#FFD700', '#ffffff', '#FF69B4']
+                });
+                canvas.style.transition = "opacity 2s";
                 canvas.style.opacity = "0";
-                message.style.display = "block";
-                audio.play().catch(err => console.log("Autoplay blocked, user must click first"));
+                document.getElementById('title').style.display = "none";
             }
         }
 
-        canvas.addEventListener('mousemove', scratch);
+        function toggleMusic() {
+            if (audio.paused) {
+                audio.play();
+                playBtn.innerText = "Pause Music ⏸️";
+            } else {
+                audio.pause();
+                playBtn.innerText = "Play Music ▶️";
+            }
+        }
+
+        canvas.addEventListener('mousemove', (e) => { if(e.buttons == 1) scratch(e); });
+        canvas.addEventListener('mousedown', scratch);
+        canvas.addEventListener('touchstart', scratch);
         canvas.addEventListener('touchmove', (e) => { e.preventDefault(); scratch(e); });
     </script>
 </body>
