@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Birthday Surprise!</title>
-    <!-- We use this for the confetti effect -->
+    <title>Surprise for Nikki!</title>
+    <!-- Confetti Script -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body { 
@@ -14,9 +14,31 @@
             color: white;
             margin: 0;
             padding: 20px;
-            overflow: hidden; /* Prevents scrolling while scratching */
+            overflow: hidden; /* Important for scratching and floating icons */
+            position: relative;
         }
-        h2 { margin-bottom: 10px; color: #FFD700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        
+        /* THE FLOATING BACKGROUND */
+        .background-icons {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .icon {
+            position: absolute;
+            font-size: 24px;
+            animation: floatUp 15s linear infinite;
+            opacity: 0.3;
+        }
+        @keyframes floatUp {
+            from { transform: translateY(110vh) rotate(0deg); }
+            to { transform: translateY(-10vh) rotate(360deg); }
+        }
+
+        /* THE APP ELEMENTS */
+        #content-wrapper { position: relative; z-index: 10; }
+        h2 { margin-top: 0; color: #FFD700; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
         
         #container { 
             position: relative; 
@@ -27,7 +49,7 @@
             cursor: crosshair;
             border: 5px solid #FFD700;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            box-shadow: 0 10px 40px rgba(0,0,0,1);
             background: #333;
         }
         canvas { 
@@ -35,6 +57,164 @@
             top: 0; left: 0; 
             border-radius: 10px;
             z-index: 2;
+            touch-action: none;
+        }
+        #under-image { 
+            width: 100%; height: 100%; 
+            object-fit: cover; 
+            border-radius: 10px;
+            z-index: 1;
+        }
+        
+        /* THE REVEAL MESSAGE & CONTROLS */
+        .revealed-area {
+            margin-top: 20px;
+            display: none; 
+            animation: fadeInMessage 2s ease-out;
+            padding: 0 15px;
+        }
+        .birthday-message {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #FFD700;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #FFD700;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+        .download-btn {
+            background: #FFD700;
+            color: #1a1a1a;
+            border: none;
+            padding: 12px 25px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+            font-size: 14px;
+        }
+        @keyframes fadeInMessage { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <!-- Floating background layer -->
+    <div class="background-icons" id="bg-icons"></div>
+
+    <div id="content-wrapper">
+        <h2 id="title">Scratch to reveal your 40th surprise, Nikki! ✨</h2>
+        
+        <div id="container">
+            <img id="under-image" src="https://i.ibb.co/FkRV2VTk/782-F89-CA-FBC0-4-D94-A084-4-B6-FD11-E5387.png">
+            <canvas id="scratch-canvas"></canvas>
+        </div>
+
+        <div class="revealed-area" id="reveal-area">
+            <!-- NIKKI'S PERSONAL MESSAGE -->
+            <div class="birthday-message">
+                To Nikki,<br><br>
+                Welcome to the 40 club, its about time you arrived! Happy Birthday, can't wait to celebrate with you,<br><br>
+                love you loads,<br><br>
+                Chris & all of the other Birthday Bitches! xXx
+            </div>
+            
+            <a class="download-btn" href="https://www.dropbox.com/scl/fi/pjwws1lb3uyw85c797qvn/We-re-the-Birthday-Bitches-The-40-Club-Remix.mp3?rlkey=cnq7hx5hkfjltrp8mvyp396u1&st=wj9975wn&raw=1" download="Nikki-Birthday-Remix.mp3">Download Song ⬇️</a>
+        </div>
+    </div>
+
+    <!-- Your Song -->
+    <audio id="birthday-song" src="https://www.dropbox.com/scl/fi/pjwws1lb3uyw85c797qvn/We-re-the-Birthday-Bitches-The-40-Club-Remix.mp3?rlkey=cnq7hx5hkfjltrp8mvyp396u1&st=wj9975wn&raw=1" loop></audio>
+
+    <script>
+        const canvas = document.getElementById('scratch-canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('container');
+        const audio = document.getElementById('birthday-song');
+        const bgIcons = document.getElementById('bg-icons');
+        let hasWon = false;
+        let scratchCount = 0;
+
+        // --- Initialize Floating Background ---
+        const icons = ['🎉', '🎂', '🎈', '💖', '✨', '🎁'];
+        for (let i = 0; i < 20; i++) {
+            const icon = document.createElement('div');
+            icon.classList.add('icon');
+            icon.innerText = icons[Math.floor(Math.random() * icons.length)];
+            icon.style.left = Math.random() * 100 + 'vw';
+            icon.style.animationDelay = Math.random() * 15 + 's';
+            icon.style.fontSize = Math.random() * (30 - 16) + 16 + 'px';
+            bgIcons.appendChild(icon);
+        }
+
+        // --- Canvas Setup ---
+        function resize() {
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+            ctx.fillStyle = '#FFD700'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'destination-out';
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- Scratch Logic ---
+        function scratch(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 35, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Try Autoplay (browsers allow once user scratches)
+            if (audio.paused) {
+                audio.play().catch(() => {
+                    // Fail silently, they'll just have to scratch more
+                });
+            }
+
+            scratchCount++;
+            // After enough scratching (about 120 points), trigger 'Win'
+            if (scratchCount > 120 && !hasWon) {
+                hasWon = true;
+                
+                // 1. Confetti Burst!
+                confetti({
+                    particleCount: 200,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#FFD700', '#ffffff', '#FF1493']
+                });
+                
+                // 2. Clear Scratch Layer and fade out title
+                canvas.style.transition = "opacity 2s";
+                canvas.style.opacity = "0";
+                document.getElementById('title').style.transition = "opacity 1s";
+                document.getElementById('title').style.opacity = "0";
+                
+                // 3. Fade in Message/Controls
+                setTimeout(() => {
+                    document.getElementById('reveal-area').style.display = 'block';
+                    document.getElementById('title').style.display = 'none';
+                    // Scroll down slightly so they see the full message on small phones
+                    window.scrollBy({ top: 150, left: 0, behavior: 'smooth' });
+                }, 1500);
+            }
+        }
+
+        // --- Listeners ---
+        canvas.addEventListener('mousemove', (e) => { if(e.buttons == 1) scratch(e); });
+        canvas.addEventListener('mousedown', scratch);
+        canvas.addEventListener('touchstart', scratch);
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); scratch(e); });
+    </script>
+</body>
+</html>            z-index: 2;
             touch-action: none;
         }
         #under-image { 
